@@ -1,4 +1,4 @@
-스프링 (프레임워크)
+스프링(프레임워크)
 
 -의존주입 (Dependency Inject :DI)지원
 -AOP(Aspect-Oriented Programming)지원
