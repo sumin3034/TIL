@@ -1,0 +1,145 @@
+스프링 MVC
+
+스프링 MVC 시작하기
+1.스프링MVC설정
+-> mvc핵심: 서블릿,jsp 의존라이브러리 추가 
+ 
+spring-webmvc
+javax.servlet-api       <scope>provided</scope>-> 배포할때 제거됨 
+servlet-jsp.api
+
+->서버추가 해당 프로젝트에 설정/ 메이븐 의존라이브러리 사용 설정 
+
+2.web.xml 파일에 DispatcherServlet 설정
+
+3.코드 구현
+
+HandlerAdapter ->@Controller, Controller 인터페이스, HttpRequestHandler 인터페이스를 통일된 방식으로 처리 
+
+
+요청 ->DispatcherServlet->컨트롤러 빈 검색요청-> HandlerMapper(인터페이스 구현체)
+->DispatcherServlet->HandlerAdapter (다양한 형태를 통일된 방식으로 처리 Model(데이터)AndView로 변환해서 리턴)
+->DispatcherServlet ->ViewResolver -> View객체로 전달 ->JSP출력
+
+ModelAndView
+1)뷰에서 처리할 데이터 model
+2)출력할 뷰에대한 정보 view
+
+  model
+     .addAttribute 
+ -요청  URL의 key값과 변수명이 동일하면 자동 매핑
+-다를 경우는
+@RequestParam으로 설정하면 된다.
+
+스프링 MVC 프레임워크 동작 방식
+
+1.WebMvcConfigurer 인터페이스와 설정
+
+DispatcherServlet
+HandlerMapping
+HandlerAdapter
+ViewResolver
+
+스프링 MVC:요청 매핑, 커맨드 객체, 리다이렉트, 폼태그, 모델
+
+1. 요청매핑 애노테이션을 이용한 경로 매핑
+2.GET과 POST 구분:
+@GetMapping,
+@PostMapping
+
+@DeleteMapping
+@PutMapping
+@PatchMapping
+
+
+@RequestMapping-모든 요청 경로 지정
+
+
+3.요청 파라미터 접근
+-@RequestParam (value, required, defaultValue)
+             Http요청 파라미터의 이름 지정, 필수여부 지정(true인데 값이 없으면 오류), 값이 없을떄 사용할 문자열(기본값X)
+- String value는 파라미터타입에 맞게 타입을 변환해준다.(기본 데이터 타입과 래퍼 타입에 대한 변환 지원 )
+
+4.커맨드 객체를 이용해서 요청 파라미터 사용하기
+커맨드 객체 클래스명 ->El변수로 자동추가 (첫글자 소문자)
+
+
+   1)커맨드 객체  기능 
+      -> 이전의 request를 이용해 getter settter로 파라미터를 읽어오게되는경우, 파라미터가 많아질수록 코드가 길어지는 불편함이 있다.
+         따라서 스프링은 편리성을 위해  요청파라미터의 값을 커맨드 객체에 담아주는 기능을 제공한다.
+    정의: 요청파라미터의 값을 전달받을수 있는 setter메서드를 포함하는 객체를 커맨드 객체로 사용한다. 
+  
+  2)사용:  요청매핑 애노테이션(Post mapping)이 적용된 메서드의 파라미터에 위치함  
+        @PostMapping("/register/step3")
+	public String handleStep3(RegisterRequest regReq) {
+	...
+	}
+   ->매개변수에 입력된 클래스의 객체를 생성하고 그 객체의 세터 메서드를 이용해서 일치하는 요청 파라미터의 값을 전달함
+
+5.뷰 JSP 코드에서 커맨드 객체 사용하기
+      ${registerRequest.name} : registerRequest가 커맨드 객체에 접근할 때 사용한 속성 이름
+     스프링 MVC는 커맨드 객체의 (첫 글자를 소문자로 바꾼) 클래스의 이름과 동일한 속성 이름을 사용해서 커맨드 객체를 뷰에 전달한다.
+	커맨드 객체의 클래스 이름이 RegisterRequest인 경우 JSP 코드는 다음처럼 registerRequest라는 이름을 사용해서 커맨드 객체에 접근
+      @ModelAttribute 애노테이션
+       @PostMaping("/register/step3")
+	
+	...
+	}
+6.@ModelAttribute
+이엘식 변수명 변경 
+
+7. 컨트롤러 구현 없는 경로 매핑 (주로 특별한 로직이 없는 경우)
+- 컨트롤러 빈X ->페이지URL +뷰
+-WebMvcConfigurer 인터페이스의 addViewControllers() 메서드
+	 @Override
+	public void addViewControllers(ViewControllerRegistry registry) {
+	registry.addViewController("/main").setViewName("main");
+	}
+
+8.커맨드 객체:중첩.콜렉션 프로퍼티
+  - 편리성을 위해  커맨드 객체를 List / 클래스 타입으로 넣어줌으로써  (중첩, 콜렉션프로퍼티 사용) 코드를 간견하게 사용할수 있음 
+  -스프링 MVC는 커맨드 객체가 리스트 타입의 프로퍼티를 가졌거나 중첩 프로퍼티를 가진 경우에도 요청 파라미터의 값을 알맞게 커맨드 객체에 설정해주는 기능을 제공
+   규칙)-HTTP 요청 파라미터 이름이 "프로퍼티이름[인덱스]' 형식이면 List 타입 프로퍼티의 값 목록으로 처리
+       -HTTP 요청 파라미터 이름이 "프로퍼티이름, 프로퍼티이름'과 같은 형식이면 중첩 프로퍼티 값을 처리
+
+9.Model을 통해 컨트롤러에서 뷰에 데이터 전달하기
+	-요청 매핑 애노테이션이 적용된 메서드의 파라미터로 Model을 추가
+	-Model 파라미터의 addAttribute() 메서드로 뷰에서 사용할 데이터 전달
+     - model.addAttribute메서드의 첫 번째 파라미터는 속성 이름
+
+10. 주요 폼 태그 (레거시 방식 )
+    -스프링이 제공하는 폼 태그를 사용하기 위해 taglib 디렉티브를 설정 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+   -modelAttribute : 커맨드 객체의 속성 이름을 지정 (첫번쨰는 속성이름 - JSP에서 속성값에 접근 )
+    
+11.리다이렉트 :컨트롤러에서 특정페이지로 리다이렉트 시키기 
+redirect:경로 
+HttpServletResponse :sendRedirect(응답헤더 Location:주소 이동)와 동일기능
+
+-------------------------------------------------------------------------------------
+
+7일차
+
+<spring:message> 태그로 메세지 출려하기 
+1.설정 및 사용 
+MessageSource messageSource()
+
+*ResourceBundleMessageSource -> property나 message태그부분 구현되어 있음 
+
+2.다국어 지원 위한 메시지 파일
+ex)
+commons_ko.properties ( 한국어)
+
+커맨드 객체의 값 검증과 에러 메세지 처리
+1.커맨드 객체 검증과 에러 코드 지정하기
+Validator인터페이스
+
+2.Error와 ValidationUtils클래스의 주요매서드
+ Errors
+ -rejectValue("필드명","메세지코드");
+ -rejectValue("필드명","메세지코드", 기본메세지);
+ - reject("메세지 코드");
+ - reject("메세지 코드", " 기본메세지");
+
+
+- hasErrors()->reject가 한번이라도 되면   true
+
