@@ -139,7 +139,7 @@ public class AppCtx {
  Repository DB연동관련
  Aspect
 
-4)컴포넌트 스캔에 따른 충동처리
+4)컴포넌트 스캔에 따른 돌처리
  Filter 
 -excludeFilters속성을 사용하면 스캔할 댸 특정 대상을 자동등록 대상에서 제외할 수 있음
 -excludeFilters type속성값
